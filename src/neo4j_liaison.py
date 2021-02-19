@@ -208,20 +208,20 @@ class Neo4jLiaison:
         # Turn the result into a list of dictionaries
         result_list = []
         for record in result_obj:
-            #print("Record:", record)         # EXAMPLE:  <Record n=<Node id=2273663 labels=frozenset({'person', 'patient'}) properties={'gender': 'M', 'id': 49, 'ht': 77}>>
+            #print("Record:", record)         # EXAMPLE:  <Record n=<Node id=2273663 labels=frozenset({'person', 'patient'}) properties={'gender': 'F', 'id': 49, 'age': 23}>>
             node_object = record[0]           # Object of type neo4j.graph.Node
-            #print("Node data:", node_object) # EXAMPLE:  <Node id=2273663 labels=frozenset({'person', 'patient'}) properties={'gender': 'M', 'id': 49, 'ht': 77}>
+            #print("Node data:", node_object) # EXAMPLE:  <Node id=2273663 labels=frozenset({'person', 'patient'}) properties={'gender': 'F', 'id': 49, 'age': 23}>
 
             node_as_items = node_object.items()     # An iterable of all property name-value pairs.  Type is:  <class 'dict_items'>
-            #print(node_as_items)                   # EXAMPLE: dict_items([('gender', 'M'), ('id', 49), ('ht', 77)])
+            #print(node_as_items)                   # EXAMPLE: dict_items([('gender', 'F'), ('id', 49), ('age', 23)])
 
             dict_from_node = dict(node_as_items)    # Construct a dictionary from the contents of the iterable
             # Type shows as : <class 'dict'>
-            #print(dict_from_node)                  # EXAMPLE: {'gender': 'M', 'id': 49, 'ht': 77}
+            #print(dict_from_node)                  # EXAMPLE: {'gender': 'F', 'id': 49, 'age': 23}
 
             result_list.append(dict_from_node)
 
-        #print(result_list)                         # Each entry in the list is a dictionary such as {'gender': 'M', 'id': 49, 'ht': 77}
+        #print(result_list)                         # Each entry in the list is a dictionary such as {'gender': 'F', 'id': 49, 'age': 23}
 
         return result_list
 
@@ -239,8 +239,8 @@ class Neo4jLiaison:
 
         :return:    A list of dictionaries - one list item per child node.
                     Each dictionary contains the record information of a node (the node's attribute names are the keys)
-                    EXAMPLE:  [ {'collection_location': 'OpenCures', 'id': 190, 'date_collected': '27-Feb-20'},
-                                {'collection_location': 'OpenCures', 'id': 62, 'date_collected': '31-May-19'} ]
+                    EXAMPLE:  [ {'id': 190, 'date_collected': '17-Feb-20'},
+                                {'id': 62, 'date_collected': '11-May-19'} ]
         """
         sess = self.get_session()       # Retrieve or create a "session" object
 
@@ -250,25 +250,25 @@ class Neo4jLiaison:
 
         #print(result_obj)   # neo4j.work.result.Result object
         #print("Result converted to list: ", list(result_obj))
-        # EXAMPLE: [<Record m=<Node id=2273968 labels=frozenset({'person', 'patient'}) properties={'collection_location': 'OpenCures', 'id': 190, 'date_collected': '27-Feb-20'}>>,
-        #           <Record m=<Node id=2273967 labels=frozenset({'person', 'patient'}) properties={'collection_location': 'OpenCures', 'id': 62, 'date_collected': '31-May-19'}>>
+        # EXAMPLE: [<Record m=<Node id=2273968 labels=frozenset({'person', 'patient'}) properties={'id': 190, 'date_collected': '17-Feb-20'}>>,
+        #           <Record m=<Node id=2273967 labels=frozenset({'person', 'patient'}) properties={'id': 62, 'date_collected': '11-May-19'}>>
         #          ]
 
         #print("Result keys: ", result_obj.keys())          # EXAMPLE: ['m']
 
         #print("Result value: ", result_obj.value())        # Returns a list of values
-        # EXAMPLE:  [<Node id=2273968 labels=frozenset({'person', 'patient'}) properties={'collection_location': 'OpenCures', 'id': 190,'date_collected': '27-Feb-20'}>,
-        #            <Node id=2273967 labels=frozenset({'person', 'patient'}) properties={'collection_location': 'OpenCures', 'id': 62, 'date_collected': '31-May-19'}>]
+        # EXAMPLE:  [<Node id=2273968 labels=frozenset({'person', 'patient'}) properties={'id': 190,'date_collected': '17-Feb-20'}>,
+        #            <Node id=2273967 labels=frozenset({'person', 'patient'}) properties={'id': 62, 'date_collected': '11-May-19'}>]
 
         result_as_list_dict = result_obj.data()             # Returns a list of dictionaries
         #print("Result data: ", result_as_list_dict)        # Returns a list of dictionaries
-        # EXAMPLE:  [{'m': {'collection_location': 'OpenCures', 'id': 190, 'date_collected': '27-Feb-20'}},
-        #            {'m': {'collection_location': 'OpenCures', 'id': 62, 'date_collected': '31-May-19'}}
+        # EXAMPLE:  [{'m': {'id': 190, 'date_collected': '17-Feb-20'}},
+        #            {'m': {'id': 62, 'date_collected': '11-May-19'}}
         #           ]
 
         children = [i["m"] for i in result_as_list_dict]
-        print("result: ", children)  # EXAMPLE:  [ {'collection_location': 'OpenCures', 'id': 190, 'date_collected': '27-Feb-20'},
-                                     #             {'collection_location': 'OpenCures', 'id': 62, 'date_collected': '31-May-19'} ]
+        print("result: ", children)  # EXAMPLE:  [ {'id': 190, 'date_collected': '17-Feb-20'},
+                                     #             {'id': 62, 'date_collected': '11-May-19'} ]
         return children
 
 
@@ -311,7 +311,7 @@ class Neo4jLiaison:
 
         # Run the query, which returns a response object
         result_obj = sess.run(cypher, cypher_dict)     # A new neo4j.Result object
-        # print(list(result_obj)) # [<Record n.name='unknown'>, <Record n.name='Sean'>, <Record n.name='Salu'>, <Record n.name='Ryan Kellogg'>, <Record n.name='Sherri'>, <Record n.name='unknown'>, <Record n.name='unknown'>, <Record n.name='Ron Primas'>, <Record n.name='Constance'>]
+        # print(list(result_obj)) # [<Record n.name='unknown'>, <Record n.name='John'>, ..., <Record n.name='Jane'>, <Record n.name='unknown'>]
 
         # Turn the result into a list
         result_list = result_obj.value(field_name)
@@ -361,7 +361,7 @@ class Neo4jLiaison:
         result_obj = sess.run(cypher, cypher_dict)     # A new neo4j.Result object
 
         # WARNING: the printing statement below will "consume" the result object!
-        #print("Response object:" , list(result_obj)) # [<Record n.name='unknown'>, <Record n.name='Sean'>, <Record n.name='Salu'>, <Record n.name='Sherri'>, ..., <Record n.name='Constance'>]
+        #print("Response object:" , list(result_obj)) # [<Record n.name='unknown'>, <Record n.name='John'>, ..., <Record n.name='Jane'>]
 
         # Turn the result into a list of dictionaries
         """        
@@ -398,14 +398,14 @@ class Neo4jLiaison:
             cypher = "MATCH (n:patient {id:$client_id})-[*3..6]->(r:biomarker_result)-->(b:biomarker)  " \
                      "RETURN b.name, r.value"
             with conn.new_session():       # The "with" statement is optional
-                result_list = self.conn.query_list_multiple_fields(cypher, {"client_id": 110})
+                result_list = self.conn.query_list_multiple_fields(cypher, {"client_id": 310})
 
         :param cypher:      A string containing a Cypher query.  Any name preceded by $ gets replaced by a value,
                                 as specified in cypher_dict, below
         :param cypher_dict: Dictionary of data binding for the Cypher string.  EXAMPLE: {"subtype": "lipid"}
 
         :return:            A list  of tuples
-                            EXAMPLE: [(279.576, 'tgttc'), (4.09, 'negt446tc')]
+                            EXAMPLE: [(279.576, 'compoundX'), (4.09, 'compoundY')]
         """
 
         if cypher_dict is None:
@@ -420,19 +420,19 @@ class Neo4jLiaison:
         result_obj = sess.run(cypher, cypher_dict)     # A new neo4j.Result object
 
         # WARNING: the printing statement below will "consume" the result object!
-        #print("Response object:" , list(result_obj)) # [<Record n.name='unknown'>, <Record n.name='Sean'>, <Record n.name='Salu'>, <Record n.name='Sherri'>, ..., <Record n.name='Constance'>]
+        #print("Response object:" , list(result_obj)) # [<Record n.name='unknown'>, <Record n.name='John'>, ..., <Record n.name='Jane'>]
 
         # Turn the result into a list of tuples
         """
         for record in result_obj:
-            print(record)           # Example: <Record r.value=279.576838838026 b.name='tgttc'>
+            print(record)           # Example: <Record r.value=12.34 b.name='compoundX'>
         
         for record in result_obj:
-            print(tuple(record))    # Example: (279.576838838026, 'tgttc')
+            print(tuple(record))    # Example: (12.34, 'compoundX')
         """
 
         result_list = [tuple(record) for record in result_obj]
-        #print(result_list)      # Example: [(279.576838838026, 'tgttc'), (4.09113968515024, 'negt446tc')]
+        #print(result_list)      # Example: [(12.34, 'compoundX'), (4.09113968515024, 'compoundY')]
 
         return result_list
 
