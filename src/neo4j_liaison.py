@@ -25,7 +25,7 @@
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
-	----------------------------------------------------------------------------------
+    ----------------------------------------------------------------------------------
 """
 import sys
 from os import path
@@ -134,7 +134,7 @@ class Neo4jLiaison:
         TODO: add a version that looks up the value of a single field
 
         EXAMPLE:
-            record = conn.retrieve_node_by_id("OC_subject", 86)
+            record = conn.retrieve_node_by_id("patient", 123)
             gender = record["gender"]
 
         :param label:       A string with a Neo4j label
@@ -160,17 +160,17 @@ class Neo4jLiaison:
             return None
 
         node = record[0]    # Object of type neo4j.graph.Node
-                            # EXAMPLE: <Node id=2273724 labels=frozenset({'OC_subject', 'OC'}) properties={'id': 110, 'gender': 'M', 'dob': '1-Jan-85'}>
+                            # EXAMPLE: <Node id=2273724 labels=frozenset({'person', 'patient'}) properties={'id': 523, 'gender': 'M', 'dob': '1-Jul-54'}>
                             # https://neo4j.com/docs/api/python-driver/current/api.html#node
         # Alternate way:
         # node = record["n"]
 
         node_as_items = node.items()    # An iterable of all property name-value pairs.  Type is:  <class 'dict_items'>
-                                        # EXAMPLE:  dict_items([('id', 110), ('gender', 'M'), ('dob', '1-Jan-85')])
+                                        # EXAMPLE:  dict_items([('id', 123), ('gender', 'F'), ('dob', '18-Jul-95')])
 
         dict_from_node = dict(node_as_items)    # Construct a dictionary from the contents of the iterable
                                                 # Type shows as : <class 'dict'>
-                                                # EXAMPLE: {'id': 110, 'gender': 'M', 'dob': '1-Jan-85'}
+                                                # EXAMPLE: {'id': 123, 'gender': 'F', 'dob': '18-Jul-95'}
 
         return dict_from_node
 
@@ -187,7 +187,7 @@ class Neo4jLiaison:
         If a more general lookup is needed, use query_list_multiple_fields_dict() instead.
 
         EXAMPLE:
-            nodes = conn.retrieve_node_by_label_and_clause("OC_subject", "n.'gender'='M' AND n.'ht' > 70")
+            nodes = conn.retrieve_node_by_label_and_clause("patient", "n.'gender'='F' AND n.'age' > 21")
 
         :param label:   A string with a Neo4j label
         :param clause:  String with a clause to define the search; the node it refers to must be specified as "n."
@@ -208,9 +208,9 @@ class Neo4jLiaison:
         # Turn the result into a list of dictionaries
         result_list = []
         for record in result_obj:
-            #print("Record:", record)         # EXAMPLE:  <Record n=<Node id=2273663 labels=frozenset({'OC', 'OC_subject'}) properties={'gender': 'M', 'id': 49, 'ht': 77}>>
+            #print("Record:", record)         # EXAMPLE:  <Record n=<Node id=2273663 labels=frozenset({'person', 'patient'}) properties={'gender': 'M', 'id': 49, 'ht': 77}>>
             node_object = record[0]           # Object of type neo4j.graph.Node
-            #print("Node data:", node_object) # EXAMPLE:  <Node id=2273663 labels=frozenset({'OC', 'OC_subject'}) properties={'gender': 'M', 'id': 49, 'ht': 77}>
+            #print("Node data:", node_object) # EXAMPLE:  <Node id=2273663 labels=frozenset({'person', 'patient'}) properties={'gender': 'M', 'id': 49, 'ht': 77}>
 
             node_as_items = node_object.items()     # An iterable of all property name-value pairs.  Type is:  <class 'dict_items'>
             #print(node_as_items)                   # EXAMPLE: dict_items([('gender', 'M'), ('id', 49), ('ht', 77)])
@@ -250,15 +250,15 @@ class Neo4jLiaison:
 
         #print(result_obj)   # neo4j.work.result.Result object
         #print("Result converted to list: ", list(result_obj))
-        # EXAMPLE: [<Record m=<Node id=2273968 labels=frozenset({'OC_sampling', 'OC'}) properties={'collection_location': 'OpenCures', 'id': 190, 'date_collected': '27-Feb-20'}>>,
-        #           <Record m=<Node id=2273967 labels=frozenset({'OC_sampling', 'OC'}) properties={'collection_location': 'OpenCures', 'id': 62, 'date_collected': '31-May-19'}>>
+        # EXAMPLE: [<Record m=<Node id=2273968 labels=frozenset({'person', 'patient'}) properties={'collection_location': 'OpenCures', 'id': 190, 'date_collected': '27-Feb-20'}>>,
+        #           <Record m=<Node id=2273967 labels=frozenset({'person', 'patient'}) properties={'collection_location': 'OpenCures', 'id': 62, 'date_collected': '31-May-19'}>>
         #          ]
 
         #print("Result keys: ", result_obj.keys())          # EXAMPLE: ['m']
 
         #print("Result value: ", result_obj.value())        # Returns a list of values
-        # EXAMPLE:  [<Node id=2273968 labels=frozenset({'OC_sampling', 'OC'}) properties={'collection_location': 'OpenCures', 'id': 190,'date_collected': '27-Feb-20'}>,
-        #            <Node id=2273967 labels=frozenset({'OC_sampling', 'OC'}) properties={'collection_location': 'OpenCures', 'id': 62, 'date_collected': '31-May-19'}>]
+        # EXAMPLE:  [<Node id=2273968 labels=frozenset({'person', 'patient'}) properties={'collection_location': 'OpenCures', 'id': 190,'date_collected': '27-Feb-20'}>,
+        #            <Node id=2273967 labels=frozenset({'person', 'patient'}) properties={'collection_location': 'OpenCures', 'id': 62, 'date_collected': '31-May-19'}>]
 
         result_as_list_dict = result_obj.data()             # Returns a list of dictionaries
         #print("Result data: ", result_as_list_dict)        # Returns a list of dictionaries
@@ -279,12 +279,12 @@ class Neo4jLiaison:
         in the context of the current session
 
         EXAMPLE 1:
-            cypher = "MATCH(n: OC_biomarker_type) RETURN n.classification AS classification"
+            cypher = "MATCH(n:biomarker_type) RETURN n.classification AS classification"
             with conn.new_session():            # The "with" statement is optional
                 result_list = conn.query_list("classification", cypher)
 
         EXAMPLE 2:
-            cypher = "MATCH (n:OC_subject)" \
+            cypher = "MATCH (n:patient)" \
                      "WHERE n.username = $username AND n.passwd = $passwd " \
                      "RETURN n.id AS user_id"
             with conn.new_session():            # The "with" statement is optional
@@ -333,7 +333,7 @@ class Neo4jLiaison:
         If just doing a simple lookup by label and clause, may use retrieve_node_by_label_and_clause() instead.
 
         EXAMPLE:
-            cypher = "MATCH(n: OC_biomarker_type) RETURN n.classification AS cls, n.subtype AS sub"
+            cypher = "MATCH(n:biomarker_type) RETURN n.classification AS cls, n.subtype AS sub"
             with conn.new_session():    # The "with" statement is optional
                 result_list = conn.query_list_multiple_fields_dict(cypher)
 
@@ -390,12 +390,12 @@ class Neo4jLiaison:
         Note: in case of a sizable numbers of fields, probably better to use query_list_multiple_fields_dict()
 
         EXAMPLE 1:
-            cypher = "MATCH(n: OC_biomarker_type) RETURN n.classification, n.subtype"
+            cypher = "MATCH(n:biomarker_type) RETURN n.classification, n.subtype"
             with conn.new_session():        # The "with" statement is optional
                 result_list = conn.query_list_multiple_fields(cypher)
 
         EXAMPLE 2:
-            cypher = "MATCH (n:OC_subject {id:$client_id})-[*3..6]->(r:OC_biomarker_result)-->(b:OC_biomarker)  " \
+            cypher = "MATCH (n:patient {id:$client_id})-[*3..6]->(r:biomarker_result)-->(b:biomarker)  " \
                      "RETURN b.name, r.value"
             with conn.new_session():       # The "with" statement is optional
                 result_list = self.conn.query_list_multiple_fields(cypher, {"client_id": 110})
@@ -500,7 +500,7 @@ class Neo4jLiaison:
 
         # Assemble the complete Cypher query
         cypher = "CREATE (:%s {%s})" % (label, attributes_str)
-        #print("Cypher query: ", cypher)            # EXAMPLE: "CREATE (:OC_test {id: $id, gender: $gender})"
+        #print("Cypher query: ", cypher)            # EXAMPLE: "CREATE (:test {id: $id, gender: $gender})"
 
         # Run the Cypher query just created
         result = self.run_query(cypher, items)
